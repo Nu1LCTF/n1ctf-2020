@@ -1,0 +1,27 @@
+<html>
+<title>Challenge submission panel</title>
+<link href="https://cdn.bootcss.com/pure/1.0.1/pure-min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="/js/submit.js"></script>
+<style>body {
+    padding: 1.337em;
+}
+
+form > * {
+    margin-bottom: 1em !important;
+}</style>
+
+
+<form class="pure-form pure-form-stacked" action="#" id="req">
+    <legend><h3>Submission for challenge "escape""</h3></legend>
+    <ul style="font-size: 14px;">
+        <li class="lead">URLs should begin with either 'http://' or 'https://'.</li>
+        <li class="lead">Allowed URL characters: {{ whitelist }}</li>
+        <li class="lead">Use the script provided to generate a valid proof-of-work,
+            parameters: {{ chal }} {{ diff }}</li>
+    </ul>
+    <h5>URL</h5> <input class="pure-u-1" type="text" name="url">
+    <h5>PoW</h5> <input class="pure-u-1" type="text" name="pow"><br>
+    <input type="submit" id="btn" value="Submit" class="pure-button pure-button-primary">
+</form>
+</html>

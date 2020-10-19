@@ -1,0 +1,13 @@
+[Unit]
+Description=Challenge Backend
+After=multi-user.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/bin/bash /challenge/backend/run.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
