@@ -1,0 +1,3 @@
+# zabbix_fun
+
+Please download the attachment to build the local environment yourself. Please note that you can only access http://127.0.0.1:8080/ to attack. If you can get the flag from secret_agent, describe the attack process in detail, and finally send it to my mail:  ########@126.com, I will give you the URL of the real online environment, and you can reproduce the attack again to obtain the real flag.  Writeup must be described in detail. Finally, please don’t damage the environment. Thank you.

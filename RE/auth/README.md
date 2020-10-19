@@ -1,0 +1,3 @@
+# auth
+
+This must be the most contrived challenge I've ever created...
