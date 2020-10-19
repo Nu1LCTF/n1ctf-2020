@@ -31,7 +31,7 @@ Make a simple fuzzer
 `php fz.php /usr/bin/php`
 
 Some short words are generated.
-![result](./WriteUp/result.png)
+![result](./result.png)
 After lots of testings, all single letter and symbol could be generated in a short time(less than one hour).
 It is often even possible to generate a single sample of multiple required characters combined together. （eg. file `<?=` could be generated）
 ##### Case ABCDEFGHI
