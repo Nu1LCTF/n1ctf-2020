@@ -27,6 +27,7 @@ This challenge requires players to use PHP filters to convert a binary file into
 #### Intended solution
 
 Make a simple fuzzer
+[fz.php](https://github.com/Nu1LCTF/n1ctf-2020/blob/main/MISC/filters/WriteUp/fz.php)
 
 `php fz.php /usr/bin/php`
 
