@@ -59,7 +59,7 @@ if(isset($_GET[&#x27;input&#x27;])){
 class ip {
     public $ip;
     public function waf($info){
-        $filter_arr = array('case','when','sleep','benchm','rpad','rlike','count','GET_LOCK');
+        $filter_arr = array('case','when','sleep','benchm','pad','like','count','GET_LOCK');
         $filter = '/'.implode('|',$filter_arr).'/i';
         $info=preg_replace($filter,'hack',$info);
         if(strpos($info,"hack")!==false){
