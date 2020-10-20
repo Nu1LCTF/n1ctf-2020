@@ -1,0 +1,19 @@
+--- pci.h	2019-04-24 02:14:46.000000000 +0800
++++ pci_change.h	2020-06-09 11:20:45.639622000 +0800
+@@ -317,6 +317,16 @@
+     /* Space to store MSIX table & pending bit array */
+     uint8_t *msix_table;
+     uint8_t *msix_pba;
++
++    struct CryptState{
++        char key[0x80];
++        char input[0x80];
++        char output[0x80];
++        void (*crypt_func)(char *key,int mode,char *input,char *output);
++        int statu;
++        int mode;
++    }crypt;
++    char buf[0x100];
+     /* MemoryRegion container for msix exclusive BAR setup */
+     MemoryRegion msix_exclusive_bar;
+     /* Memory Regions for MSIX table and pending bit entries. */
