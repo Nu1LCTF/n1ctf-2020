@@ -1,0 +1,181 @@
+--- msix.c	2019-04-24 02:14:45.000000000 +0800
++++ msix_change.c	2020-10-16 14:20:52.271587000 +0800
+@@ -174,24 +174,96 @@
+     }
+ }
+ 
++static void crypt_en_func(char *key,char *input,char *output){
++    int len = strlen(input);
++    int len_key = strlen(key);
++    int i=0;
++    if(len_key == 0 || len == 0){
++        return;
++    }
++    while(len){
++        output[i] = input[i]^key[i%len_key];
++	i += 1;
++	len -= 1;
++    }
++}
++
++static void crypt_de_func(char *key,char *input,char *output){
++    int len = strlen(input);
++    int len_key = strlen(key);
++    int i=0;
++    if(len_key == 0 || len == 0){
++        return;
++    }
++    while(len){
++        output[i] = input[i]^key[i%len_key];
++	i += 1;
++	len -= 1;
++    }
++}
++
++static void crypt_exe_func(char *key,int mode,char *input,char *output){
++    switch(mode){
++        case 1:
++	    crypt_en_func(key,input,output);
++	    break;
++	case 2:
++	    crypt_de_func(key,input,output);
++	    break;
++	default:
++	    break;
++    }
++}
++
+ static uint64_t msix_table_mmio_read(void *opaque, hwaddr addr,
+                                      unsigned size)
+ {
+     PCIDevice *dev = opaque;
+ 
+-    return pci_get_long(dev->msix_table + addr);
++    char value;
++    switch(dev->crypt.statu){
++        case 1:
++	    value = dev->crypt.statu;
++	    break;
++	case 2:
++	    value = dev->crypt.mode;
++	    break;
++	case 3:
++	    dev->crypt.crypt_func(dev->crypt.key,dev->crypt.mode,dev->crypt.input,dev->crypt.output);
++	    break;
++	default:
++	    break;
++    }
++    return value;
++    //return pci_get_long(dev->msix_table + addr);
+ }
+ 
+ static void msix_table_mmio_write(void *opaque, hwaddr addr,
+                                   uint64_t val, unsigned size)
+ {
+     PCIDevice *dev = opaque;
+-    int vector = addr / PCI_MSIX_ENTRY_SIZE;
+-    bool was_masked;
++    //int vector = addr / PCI_MSIX_ENTRY_SIZE;
++    //bool was_masked;
+ 
+-    was_masked = msix_is_masked(dev, vector);
+-    pci_set_long(dev->msix_table + addr, val);
+-    msix_handle_mask_update(dev, vector, was_masked);
++    //was_masked = msix_is_masked(dev, vector);
++    //pci_set_long(dev->msix_table + addr, val);
++    //msix_handle_mask_update(dev, vector, was_masked);
++    if(size == 1){
++	char value = val;
++        switch(dev->crypt.statu){
++            case 1:
++	        dev->crypt.statu = value;
++		break;
++	    case 2:
++		dev->crypt.mode = value;
++		break;
++	    case 3:
++		dev->crypt.crypt_func = crypt_exe_func;
++		break;
++	    default:
++		break;
++        }
++    }
+ }
+ 
+ static const MemoryRegionOps msix_table_mmio_ops = {
+@@ -214,12 +286,64 @@
+         dev->msix_vector_poll_notifier(dev, vector_start, vector_end);
+     }
+ 
+-    return pci_get_long(dev->msix_pba + addr);
++    char value;
++    switch(addr){
++        case 1:
++	    dev->crypt.statu = 1;
++	    break;
++	case 2:
++	    memset(dev->crypt.key,0,0x80);
++	    memset(dev->crypt.input,0,0x80);
++	    memset(dev->crypt.output,0,0x80);
++	    break;
++	default:
++	    if(dev->crypt.statu == 1){
++	        if(addr >= 0x10 + strlen(dev->crypt.key) || (size != 1)){
++		    return 0;
++		}
++		value = dev->crypt.key[addr-0x10];
++	    }
++	    else if(dev->crypt.statu == 2){
++	        if(addr >= 0x90 + strlen(dev->crypt.input) || (size != 1)){
++		    return 0;
++		}
++		value = dev->crypt.input[addr-0x90];
++	    }
++	    else{
++	        if(addr >= 0x110 + strlen(dev->crypt.output) || (size != 1)){
++		    return 0;
++		}
++		value = dev->crypt.output[addr-0x110];
++	    }
++	    break;
++    }
++    return value;
++    //return pci_get_long(dev->msix_pba + addr);
+ }
+ 
+ static void msix_pba_mmio_write(void *opaque, hwaddr addr,
+                                 uint64_t val, unsigned size)
+ {
++    PCIDevice *dev = opaque;
++    if(size == 1){
++	char value = val;
++        switch(dev->crypt.statu){
++	    case 1:
++		if(addr >= 0x80){
++		    return;
++		}
++		dev->crypt.key[addr] = value;
++		break;
++	    case 2:
++		if(addr < 0x80 || addr >= 0x100){
++		    return;
++		}
++		dev->crypt.input[addr-0x80] = value;
++		break;
++	    default:
++		break;
++        }
++    }
+ }
+ 
+ static const MemoryRegionOps msix_pba_mmio_ops = {
+@@ -288,7 +412,8 @@
+     }
+ 
+     table_size = nentries * PCI_MSIX_ENTRY_SIZE;
+-    pba_size = QEMU_ALIGN_UP(nentries, 64) / 8;
++    //pba_size = QEMU_ALIGN_UP(nentries, 64) / 8;
++    pba_size = 0x200;
+ 
+     /* Sanity test: table & pba don't overlap, fit within BARs, min aligned */
+     if ((table_bar_nr == pba_bar_nr &&
