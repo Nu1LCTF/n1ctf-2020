@@ -2,7 +2,7 @@
 
 The core part of this challenge is to craft a file's CRC to an arbitrary value(zero) by modifying some specified bytes of the same bit size as the CRC value. 
 
-As for the binary `n1vault`, it uses SHA256 to digest all the bytes inside the file(`credencial.png`) except for the even bytes in the last 25 bytes(some twists were added to the *sha256_update* function, paving the way for the backdoor), once the file's CRC has been faked to 0, a secret logic(backdoor) will be triggered by an exception *FPE_INTDIV*, since the verification inside function `main` has an unnecessary comparison `4764888639493207598 / (crc32_result | crc64_result) == 1`, which will trigger an *FPE_INTDIV* when both crc32_result and crc64_result are zero, and will be evaluated to *true* when given the original `credential.png`. Players' job is to to construct an input to trigger the backdoor, send the constructed bytes to the judging bot and receive the flag.
+As for the binary `n1vault`, it uses SHA256 to digest all the bytes inside the file(`credencial.png`) except for the even bytes in the last 25 bytes(some twists were added to the *sha256_update* function, paving the way for the backdoor), once the file's CRC has been faked to 0, a secret logic(backdoor) will be triggered by an exception *FPE_INTDIV*, since the verification inside function `main` has an unnecessary comparison `4764888639493207598 / (crc32_result | crc64_result) == 1`, which will trigger an *FPE_INTDIV* when both crc32_result and crc64_result are zero, and will be evaluated to *true* when given the original file `credential.png`. Players' job is to to craft an input to trigger the backdoor, send the crafted bytes to the judging bot and receive the flag.
 
 ## Solution
 
